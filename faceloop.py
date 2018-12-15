@@ -43,6 +43,7 @@ def imageProp(img): # Imprime a imagem em array, o tipo de imagem e seu tamanho
 
 while True: # Reproduz vídeo até que uma tecla definida seja pressionada
     ret, image = cap.read()
+    image = cv2.flip(image, 1)
     resize = cv2.resize(image, (480, 360))
     display = cv2.resize(image, (480, 360))
     gray = cv2.cvtColor(resize, cv2.COLOR_BGR2GRAY)
@@ -51,7 +52,7 @@ while True: # Reproduz vídeo até que uma tecla definida seja pressionada
     if len(detectRect) > 0:
             text = "{} rosto(s) encontrado(s)".format(len(detectRect))
             cv2.putText(resize, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
-            	0.5, (0, 0, 255), 2)
+            	0.7, (0, 0, 255), 2)
     for boxDrawing in detectRect:
 
         (bX, bY, bW, bH) = face_utils.rect_to_bb(boxDrawing)
@@ -73,8 +74,8 @@ while True: # Reproduz vídeo até que uma tecla definida seja pressionada
     #cv2.imshow("Video Output - Gray", gray)
 
     cv2.imshow("Video Output - 480x360", resize)
-    #crop = display[bY:(bY + bH),bX:(bX + bW)]
-    #cv2.imshow("Cropped Output", crop)
+    crop = display[bY:(bY + bH),bX:(bX + bW)]
+    cv2.imshow("Cropped Output", crop)
 
 
     k = cv2.waitKey(10) & 0xFF
