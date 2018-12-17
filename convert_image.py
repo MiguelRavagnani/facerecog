@@ -40,6 +40,15 @@ TEMPLATE = np.float32([
     (0.5240106503, 0.783370783245), (0.477561227414, 0.778476346951)])
 
 
+INV_TEMPLATE = np.float32([
+    (-0.04099179660567834, -0.008425234314031194, 2.575498465013183),
+    (0.04062510634554352, -0.009678089746831375, -1.2534351452524177),
+    (0.0003666902601348179, 0.01810332406086298, -0.32206331976076663)])
+
+TPL_MIN, TPL_MAX = np.min(TEMPLATE, axis=0), np.max(TEMPLATE, axis=0)
+MINMAX_TEMPLATE = (TEMPLATE - TPL_MIN) / (TPL_MAX - TPL_MIN)
+
+
 templateConv = np.float32([(1,1), (1,1), (1,1), (1,1),
 (1,1), (1,1), (1,1), (1,1),
 (1,1), (1,1), (1,1), (1,1),
@@ -59,16 +68,16 @@ templateConv = np.float32([(1,1), (1,1), (1,1), (1,1),
 (1,1), (1,1), (1,1), (1,1)])
 
 for i in range(0, 68):
-    templateConv[i] = np.int32(TEMPLATE[i] * 500)
+    templateConv[i] = np.int32(MINMAX_TEMPLATE[i] * 1000)
 
-hm, wm = (500, 500)
+hm, wm = (1100, 1100)
 
 conv = np.zeros((hm, wm, 3), dtype=np.uint8)
 
 n = 0
 
-for h in range(0, 500):
-    for w in range(0, 500):
+for h in range(0, 1100):
+    for w in range(0, 1100):
         for k in range(0, 68):
             if h == templateConv[[k], [0]] and w == templateConv[[k], [1]]:
                 n += 1

@@ -60,24 +60,24 @@ INV_TEMPLATE = np.float32([
 TPL_MIN, TPL_MAX = np.min(TEMPLATE, axis=0), np.max(TEMPLATE, axis=0)
 MINMAX_TEMPLATE = (TEMPLATE - TPL_MIN) / (TPL_MAX - TPL_MIN)
 
-class AlignDlib():
+class AlignDlib:
     INEYES_BOTLIP_TRIANG = [39, 42, 57] # Triângulos delimitados interior dos olhos e lábios inferiores
 
     OUTEYES_NOSE_TRIANG = [36, 45, 33] # Triângulos delimitados exterior dos olhos e nariz
 
-    def __init__(self, predictor):
+    def __init__(self, pathPredictor):
 
         assert facePredictor is not None # Verifica se o caminho definido é válido
 
-        self.detector = dlib.get_frontal_face_detector() # Seleciona o detector do caminho de facePredictor definido (normalmente seleciona entre os landmark predictors de 68 ou 5 pontos)
-        self.predictor = dlib.shape_predictor(predictor)
+        self.HOG_Detector = dlib.get_frontal_face_detector() # Seleciona o detector do caminho de facePredictor definido (normalmente seleciona entre os landmark predictors de 68 ou 5 pontos)
+        self.predictor = dlib.shape_predictor(pathPredictor)
 
     def allBoudingBoxesInFace(self, rgbImg):
 
         assert rgbImg is not None # Garante que a imagem não é nula
 
         try:
-            return self.detector(rgbImg, 1)
+            return self.HOG_Detector(rgbImg, 1)
         except Exception as e:
             print("Deu ruim: {}".format(e))
 
@@ -107,9 +107,9 @@ class AlignDlib():
         assert rgbImg is not None
         assert landmarkIndices is not None
 
-        if bb is None:
-            bb = self.getLargestFaceBoundingBox(rgbImg, skipMulti)
-            if bb is None:
+        if bbox is None:
+            bbox = self.getLargestFaceBoundingBox(rgbImg, skipMulti)
+            if bbox is None:
                 return
 
         if landmarks is None:

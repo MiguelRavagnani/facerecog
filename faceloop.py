@@ -1,3 +1,4 @@
+from imutils.video import VideoStream
 from imutils import face_utils
 import imutils
 import cv2
@@ -67,19 +68,21 @@ while True: # Reproduz vídeo até que uma tecla definida seja pressionada
         for (i, (x, y)) in enumerate(shape):
             cv2.circle(resize, (x, y), 1, (255, 0, 255), -1)
             cv2.putText(resize, str(i + 1), (x - 10, y - 10),
-            	cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 0, 255), 1)
+            	cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 0, 255), 1)
 
 
     #cv2.imshow("Video Output - Original", image)
     #cv2.imshow("Video Output - Gray", gray)
 
     cv2.imshow("Video Output - 480x360", resize)
-    crop = display[bY:(bY + bH),bX:(bX + bW)]
-    cv2.imshow("Cropped Output", crop)
+
+    if bY is not None and bX is not None and bH is not None and bW is not None:
+	    crop = display[bY:(bY + bH),bX:(bX + bW)]
+	    cv2.imshow("Cropped Output", crop)
 
 
     k = cv2.waitKey(10) & 0xFF
-    if k == 99:
+    if k == ord('c'):
         break
 
 # imageProp(image)
