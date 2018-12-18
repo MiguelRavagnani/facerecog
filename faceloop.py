@@ -5,23 +5,7 @@ import cv2
 import argparse
 import time
 import dlib
-
-ap = argparse.ArgumentParser()
-ap.add_argument("-p", "--shape-predictor", required=True,
-	help="Caminho para Shape Predictor")
-args = vars(ap.parse_args()) # shape_predictor_68_face_landmarks.dat
-
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(args["shape_predictor"])
-
-cap = cv2.VideoCapture(0) # Caputa vídeo
-
-print("[TIME SLEEP]: 3s..")
-time.sleep(1.0)
-print("[TIME SLEEP]: 2s..")
-time.sleep(1.0)
-print("[TIME SLEEP]: 1s..")
-time.sleep(1.0)
+import numpy as np
 
 def convToBoundingBox(rectang): # Converte, para o formato (x, y, w, h), uma Bounding box encontrada
 
@@ -42,25 +26,58 @@ def imageProp(img): # Imprime a imagem em array, o tipo de imagem e seu tamanho
     print("Tamanho da imagem: ")
     print(img.shape)
 
+ap = argparse.ArgumentParser()
+ap.add_argument("-p", "--shape-predictor", required=True,
+	help="Caminho para Shape Predictor")
+args = vars(ap.parse_args()) # shape_predictor_68_face_landmarks.dat
+
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor(args["shape_predictor"])
+
+
+cap = cv2.VideoCapture(0) # Caputa vídeo
+
+print("[TIME SLEEP]: 3s..")
+time.sleep(1.0)
+print("[TIME SLEEP]: 2s..")
+time.sleep(1.0)
+print("[TIME SLEEP]: 1s..")
+time.sleep(1.0)
+
+
 while True: # Reproduz vídeo até que uma tecla definida seja pressionada
     ret, image = cap.read()
     image = cv2.flip(image, 1)
     resize = cv2.resize(image, (480, 360))
     display = cv2.resize(image, (480, 360))
     gray = cv2.cvtColor(resize, cv2.COLOR_BGR2GRAY)
-    detectRect = detector(gray, 0)
+    detectRect = detector(gray, 1)
 
     if len(detectRect) > 0:
             text = "{} rosto(s) encontrado(s)".format(len(detectRect))
             cv2.putText(resize, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
             	0.7, (0, 0, 255), 2)
+
+    boxDim = []
+    bX = []
+    bY = []
+    bW = []
+    bH = []
+    for aux in range(0, len(detectRect)):
+        boxDim.append(aux)
+        bX.append(aux)
+        bY.append(aux)
+        bW.append(aux)
+        bH.append(aux)
+    print(len(boxDim))
     for boxDrawing in detectRect:
+        for aux in range(0, len(detectRect)):
+            boxDim[aux] = face_utils.rect_to_bb(boxDrawing)
+            (bX[aux], bY[aux], bW[aux], bH[aux]) = boxDim[aux]
+        #(bX, bY, bW, bH) = face_utils.rect_to_bb(boxDrawing)
 
-        (bX, bY, bW, bH) = face_utils.rect_to_bb(boxDrawing)
-
-        cv2.rectangle(resize, (bX, bY), (bX + bW, bY + bH),
-        	(0, 255, 0), 1)
-
+            cv2.rectangle(resize, (bX[aux], bY[aux]), (bX[aux] + bW[aux], bY[aux] + bH[aux]),
+        	    (0, 255, 0), 1)
 
         shape = predictor(gray, boxDrawing)
         shape = face_utils.shape_to_np(shape)
@@ -76,10 +93,16 @@ while True: # Reproduz vídeo até que uma tecla definida seja pressionada
 
     cv2.imshow("Video Output - 480x360", resize)
 
-    if bY is not None and bX is not None and bH is not None and bW is not None:
-	    crop = display[bY:(bY + bH),bX:(bX + bW)]
-	    cv2.imshow("Cropped Output", crop)
+    roi = []
 
+    if bY is not None and bX is not None and bH is not None and bW is not None:
+        for i in range(0, len(detectRect)):
+            roi.append(i)
+            roi[i] = display[bY[i]:(bY[i] + bH[i]),bX[i]:(bX[i] + bW[i])]
+
+    if roi:
+        for i in range(0, len(roi)):
+            cv2.imshow("ROI: Rosto {}".format(i+1), roi[i])
 
     k = cv2.waitKey(10) & 0xFF
     if k == ord('c'):
