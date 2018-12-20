@@ -1,24 +1,29 @@
-from imutils.video import VideoStream
-from imutils import face_utils
-import imutils
-import cv2
 import argparse
-import time
-import dlib
-import numpy as np
 import os
 import shutil
+import time
+
+import cv2
+import imutils
+import numpy as np
+from imutils import face_utils
+from imutils.video import VideoStream
+
+import dlib
+
 
 def saveCrop(crop):
     for i in range(0, len(crop)):
-        dir = "/home/miguelrc/Documents/github/facerecog/face_{}".format(i+1)
+        pathDir = os.path.dirname(os.path.abspath(__file__))
+        dir = pathDir + "/face_{}".format(i+1)
         if not os.path.exists(dir):
             os.makedirs(dir)
         cv2.imwrite(os.path.join(dir , 'face_{}.jpg'.format(i+1)), crop[i])
 
 def delCrop(crop):
     for i in range(0, len(crop)):
-        dir = "/home/miguelrc/Documents/github/facerecog/face_{}".format(i+1)
+        pathDir = os.path.dirname(os.path.abspath(__file__))
+        dir = pathDir + "/face_{}".format(i+1)
         shutil.rmtree(dir)
 
 def showCrop(crop, i, aux):
@@ -43,10 +48,10 @@ time.sleep(1.0)
 print("[TIME SLEEP]: 1s..")
 time.sleep(1.0)
 
-cap = cv2.VideoCapture(0) # Caputa vídeo
+cap = cv2.VideoCapture(0) # Caputa video
 cap.set(5,30)
 
-while True: # Reproduz vídeo até que uma tecla definida seja pressionada
+while True: # Reproduz video ate que uma tecla definida seja pressionada
     ret, image = cap.read()
     image = cv2.flip(image, 1, 0)
     resize = cv2.resize(image, (240, 180))
@@ -92,11 +97,11 @@ time.sleep(1.0)
 if len(crop) > 0:
     delet = ''
     while True:
-        delet = input("Apagar pastas criadas? [s/n] ")
+        delet = input("Manter pasta(s) criada(s)? [s/n] ")
         if delet == 's' or delet == 'n':
             break
 
-    if delet == 's':
+    if delet == 'n':
         delCrop(crop)
         print("Pasta(s) apagada(s)")
     else:
