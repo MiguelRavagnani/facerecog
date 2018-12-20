@@ -6,7 +6,7 @@ import argparse
 import time
 import dlib
 import numpy as np
-"""
+
 def printBox(index, X, Y, W, H, img, aux, dim, boxDrawing):
     for i in range(0, index+1):
         dim.append(i)
@@ -27,7 +27,7 @@ def printBox(index, X, Y, W, H, img, aux, dim, boxDrawing):
         return (printBox(index+1, X, Y, W, H, img, aux-1, dim, boxDrawing))
     else:
         return (dim[index])
-"""
+
 
 def convToBoundingBox(rectang): # Converte, para o formato (x, y, w, h), uma Bounding box encontrada
 
