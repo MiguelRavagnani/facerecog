@@ -63,8 +63,8 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
 
     crop = []
     for i, dim in enumerate(detectRect):
-        #print("Rosto {}: Left: {} Top: {} Right: {} Bottom: {}".format(
-        #    i, dim.left(), dim.top(), dim.right(), dim.bottom()))
+        print("Rosto {}: Left: {} Top: {} Right: {} Bottom: {}".format(
+            i, dim.left(), dim.top(), dim.right(), dim.bottom()))
         crop.append(i)
         crop[i] = resize[max(0, dim.top()): min(dim.bottom(), 480),
                     max(0, dim.left()): min(dim.right(), 360)]
