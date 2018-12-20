@@ -7,14 +7,17 @@ import time
 import dlib
 import numpy as np
 
-def convToBoundingBox(rectang): # Converte, para o formato (x, y, w, h), uma Bounding box encontrada
+def saveCrop(detectRect):
+    for i, dim in enumerate(detectRect):
+        mkdir
 
-    x = rectang.left()
-    y = rectang.top()
-    w = rectang.right() - x
-    h = rectang.bottom() - y
+def showCrop(crop, i, aux):
+    assert crop[i] is not None
+    cv2.imshow("Crop {}".format(i+1), crop[i])
+    cv2.moveWindow("Crop {}".format(i+1), 580, 0 + i*200)
+    if (aux-1) > 0:
+        showCrop(crop, i+1, aux-1)
 
-    return (x, y, w, h)
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-p", "--shape-predictor", required=True,
@@ -38,7 +41,7 @@ cap.set(5,30)
 while True: # Reproduz vídeo até que uma tecla definida seja pressionada
     ret, image = cap.read()
     image = cv2.flip(image, 1, 0)
-    resize = cv2.resize(image, (480, 360))
+    resize = cv2.resize(image, (240, 180))
     display = cv2.resize(image, (480, 360))
     gray = cv2.cvtColor(resize, cv2.COLOR_BGR2GRAY)
 
@@ -46,7 +49,7 @@ while True: # Reproduz vídeo até que uma tecla definida seja pressionada
 
     if len(detectRect) > 0:
         text = "{} rosto(s) encontrado(s)".format(len(detectRect))
-        cv2.putText(resize, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
+        cv2.putText(display, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
         	0.7, (0, 0, 255), 2)
 
     crop = []
@@ -57,28 +60,18 @@ while True: # Reproduz vídeo até que uma tecla definida seja pressionada
         crop[i] = resize[max(0, dim.top()): min(dim.bottom(), 480),
                     max(0, dim.left()): min(dim.right(), 360)]
 
-        cv2.rectangle(resize, (dim.left(), dim.top()), (dim.left() + dim.right() - dim.left(), dim.top() + dim.bottom() - dim.top()), (0, 255, 0), 1)
+        cv2.rectangle(display, (dim.left()*2, dim.top()*2), (dim.left()*2 + dim.right()*2 - dim.left()*2, dim.top()*2 + dim.bottom()*2 - dim.top()*2), (0, 255, 0), 1)
 
         text = "Rosto {}".format(i+1)
-        cv2.putText(resize, text, (dim.left(), dim.top()-10),
+        cv2.putText(display, text, (dim.left()*2, dim.top()*2-10),
             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
 
-    cv2.imshow("Video Output - 480x360", resize)
+    cv2.imshow("Video Output - 480x360", display)
     cv2.moveWindow("Video Output - 480x360".format(1), 0, 0)
 
     if len(crop) > 0:
-        assert crop[0] is not None
-        cv2.imshow("Crop {}".format(1), crop[0])
-        cv2.moveWindow("Crop {}".format(1), 580, 0)
-        if len(crop) > 1:
-            assert crop[1] is not None
-            cv2.imshow("Crop {}".format(2), crop[1])
-            cv2.moveWindow("Crop {}".format(2), 580, 0 + 300)
-            if len(crop) > 2:
-                assert crop[2] is not None
-                cv2.imshow("Crop {}".format(3), crop[2])
-                cv2.moveWindow("Crop {}".format(3), 580 + 300, 0)
+        showCrop(crop, 0, len(crop))
 
     k = cv2.waitKey(10) & 0xFF
     if k == ord('c'):
