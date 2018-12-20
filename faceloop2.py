@@ -4,34 +4,30 @@ import shutil
 import time
 
 import cv2
-import imutils
-import numpy as np
-from imutils import face_utils
-from imutils.video import VideoStream
 
 import dlib
 
 
-def saveCrop(crop):
-    for i in range(0, len(crop)):
+def saveCrop(img):
+    for j in range(0, len(img)):
         pathDir = os.path.dirname(os.path.abspath(__file__))
-        dir = pathDir + "/face_{}".format(i+1)
-        if not os.path.exists(dir):
-            os.makedirs(dir)
-        cv2.imwrite(os.path.join(dir , 'face_{}.jpg'.format(i+1)), crop[i])
+        directory = pathDir + "/face_{}".format(j+1)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        cv2.imwrite(os.path.join(directory , 'face_{}.jpg'.format(j+1)), img[j])
 
-def delCrop(crop):
-    for i in range(0, len(crop)):
+def delCrop(img):
+    for j in range(0, len(img)):
         pathDir = os.path.dirname(os.path.abspath(__file__))
-        dir = pathDir + "/face_{}".format(i+1)
-        shutil.rmtree(dir)
+        directory = pathDir + "/face_{}".format(j+1)
+        shutil.rmtree(directory)
 
-def showCrop(crop, i, aux):
-    assert crop[i] is not None
-    cv2.imshow("Crop {}".format(i+1), crop[i])
-    cv2.moveWindow("Crop {}".format(i+1), 580, i*200)
+def showCrop(img, j, aux):
+    assert img[j] is not None
+    cv2.imshow("Crop {}".format(j+1), img[j])
+    cv2.moveWindow("Crop {}".format(j+1), 580, j*200)
     if (aux-1) > 0:
-        showCrop(crop, i+1, aux-1)
+        showCrop(img, j+1, aux-1)
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-p", "--shape-predictor", required=True,
@@ -80,7 +76,7 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
     cv2.imshow("Video Output - 480x360", display)
-    cv2.moveWindow("Video Output - 480x360".format(1), 0, 0)
+    cv2.moveWindow("Video Output - 480x360", 0, 0)
 
     if len(crop) > 0:
         showCrop(crop, 0, len(crop))
