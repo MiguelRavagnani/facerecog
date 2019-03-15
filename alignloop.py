@@ -64,7 +64,6 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
 
     for RECT in DETECT_RET:               
         (x, y, w, h) = rect_to_bb(RECT)
-#        FACE_RAW = imutils.resize(RESIZE[y:y + h, x:x + w], width=256)
         FACE_LIST.append(i)
         FACE_LIST[i] = FA.align(RESIZE, GRAY, RECT)
 
@@ -72,8 +71,11 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
             TEXT = "{} rosto(s) encontrado(s)".format(len(DETECT_RET))
             cv2.putText(RESIZE, TEXT, (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
                     0.7, (0, 0, 255), 2)
+        cv2.rectangle(RESIZE, (x, (y + h)), (x + (x + w) - x, (y + h) + y - (y + h)), (0, 255, 0), 1)
 
         TEXT = "Rosto {}".format(i+1)
+        cv2.putText(RESIZE, TEXT, (x, y - 10),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         i = i + 1 
     cv2.imshow("Video Output Original", RESIZE)
     cv2.moveWindow("Video Output", 0, 0)
