@@ -2,7 +2,10 @@ import argparse
 import os
 import shutil
 import time
+import numpy as np
 import imutils
+import math
+from imutils import face_utils
 from imutils.face_utils import FaceAligner
 from imutils.face_utils import rect_to_bb
 
@@ -32,6 +35,12 @@ def show_crop(img, j, AUX):
     if (AUX-1) > 0:
         show_crop(img, j+1, AUX-1)
 
+def face_output(coord, i_1, i_2):
+    x_1, y_1 = coord[i_1]
+    x_2, y_2 = coord[i_2]
+    DISTANCE = math.sqrt(((x_2-x_1)**2)+((y_2-y_1)**2))
+    return DISTANCE
+
 AP = argparse.ArgumentParser()
 AP.add_argument("-p", "--shape-predictor", required=True,
                 help="Caminho para Shape Predictor")
@@ -59,13 +68,44 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
 
     DETECT_RET = DETECTOR(GRAY, 1)
     FACE_LIST = []
-    
+    FACE_LANDMARKS_LIST = []
+    FACE_LANDMARKS_FEATURES = []
+
     i = 0
 
     for RECT in DETECT_RET:               
         (x, y, w, h) = rect_to_bb(RECT)
         FACE_LIST.append(i)
         FACE_LIST[i] = FA.align(RESIZE, GRAY, RECT)
+        
+        """
+        SHAPE = PREDICTOR(FACE_LIST[i], RECT)
+        SHAPE = face_utils.shape_to_np(SHAPE)
+
+        for (name, (m, n)) in face_utils.FACIAL_LANDMARKS_IDXS.items():
+            FACE_LANDMARKS_LIST.append(i)
+            for (xf, yf) in SHAPE[m:n]:
+                FACE_LANDMARKS_FEATURES.append((xf, yf))
+        """
+        
+        for k, d in enumerate(DETECT_RET):  
+            SHAPE = PREDICTOR(FACE_LIST[i], d)
+        for j in range(0,67):
+            FACE_LANDMARKS_FEATURES.append((SHAPE.part(j).x, SHAPE.part(j).y))
+        """
+        print("Nose bottom {}".format(FACE_LANDMARKS_FEATURES[33]))
+        print("Left Eye {}".format(FACE_LANDMARKS_FEATURES[39]))
+        print("Rigth Eye {}".format(FACE_LANDMARKS_FEATURES[42]))
+        print("Mouth {}".format(FACE_LANDMARKS_FEATURES[57]))
+        print("Mid Eyes (J1): {}".format(face_output(FACE_LANDMARKS_FEATURES, 39, 42)))
+        print("Left Eye to Mouth (J2): {}".format(face_output(FACE_LANDMARKS_FEATURES, 36, 57)))
+        print("Right Eye to Mouth (J3): {}".format(face_output(FACE_LANDMARKS_FEATURES, 45, 57)))
+        print("Letf Eye to Nose (J4): {}".format(face_output(FACE_LANDMARKS_FEATURES, 39, 33)))
+        print("Right Eye to Nose (J5): {}".format(face_output(FACE_LANDMARKS_FEATURES, 42, 33)))
+        print("Top Nose to Mouth (J6): {}".format(face_output(FACE_LANDMARKS_FEATURES, 27, 57)))
+        print("Top Nose to Nose (J7): {}".format(face_output(FACE_LANDMARKS_FEATURES, 27, 33)))
+        print("Nose Width (J8): {}".format(face_output(FACE_LANDMARKS_FEATURES, 31, 35)))
+        """
 
         if len(DETECT_RET) > 0:
             TEXT = "{} rosto(s) encontrado(s)".format(len(DETECT_RET))
