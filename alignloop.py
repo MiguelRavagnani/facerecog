@@ -8,6 +8,8 @@ import math
 from imutils import face_utils
 from imutils.face_utils import FaceAligner
 from imutils.face_utils import rect_to_bb
+from sklearn import preprocessing
+from sklearn.preprocessing import Normalizer
 
 import cv2
 
@@ -78,16 +80,6 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
         FACE_LIST.append(i)
         FACE_LIST[i] = FA.align(RESIZE, GRAY, RECT)
         
-        """
-        SHAPE = PREDICTOR(FACE_LIST[i], RECT)
-        SHAPE = face_utils.shape_to_np(SHAPE)
-
-        for (name, (m, n)) in face_utils.FACIAL_LANDMARKS_IDXS.items():
-            FACE_LANDMARKS_LIST.append(i)
-            for (xf, yf) in SHAPE[m:n]:
-                FACE_LANDMARKS_FEATURES.append((xf, yf))
-        """
-        
         for k, d in enumerate(DETECT_RET):  
             SHAPE = PREDICTOR(FACE_LIST[i], d)
         for j in range(0,67):
@@ -106,6 +98,22 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
         print("Top Nose to Nose (J7): {}".format(face_output(FACE_LANDMARKS_FEATURES, 27, 33)))
         print("Nose Width (J8): {}".format(face_output(FACE_LANDMARKS_FEATURES, 31, 35)))
         """
+        J_ARRAY = []
+        J_ARRAY.append(face_output(FACE_LANDMARKS_FEATURES, 39, 42))
+        J_ARRAY.append(face_output(FACE_LANDMARKS_FEATURES, 36, 57))
+        J_ARRAY.append(face_output(FACE_LANDMARKS_FEATURES, 45, 57))
+        J_ARRAY.append(face_output(FACE_LANDMARKS_FEATURES, 39, 33))
+        J_ARRAY.append(face_output(FACE_LANDMARKS_FEATURES, 42, 33))
+        J_ARRAY.append(face_output(FACE_LANDMARKS_FEATURES, 27, 57))
+        J_ARRAY.append(face_output(FACE_LANDMARKS_FEATURES, 27, 33))
+        J_ARRAY.append(face_output(FACE_LANDMARKS_FEATURES, 31, 35))
+        
+        J_NP = np.array(J_ARRAY)
+        J_NP = np.array(J_NP).reshape((len(J_NP), 1))    
+        J_MIN_MAX = preprocessing.MinMaxScaler()
+        J_NORM = J_MIN_MAX.fit_transform(J_NP)
+
+        print("Normalized: J1 {} J2 {} J3 {} J4 {} J5 {} J6 {} J7 {} J8 {}".format(J_NORM[0], J_NORM[1], J_NORM[2], J_NORM[3], J_NORM[4], J_NORM[5], J_NORM[6], J_NORM[7]))
 
         if len(DETECT_RET) > 0:
             TEXT = "{} rosto(s) encontrado(s)".format(len(DETECT_RET))
