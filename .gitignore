@@ -1,5 +1,12 @@
 faceenv
-face_1
-face_2
-face_3
-face_4
+.vscode
+.pylintrc
+align_dlib.py
+faceloop.py
+faceloop2.py
+shape_predictor_5_face_landmarks.dat
+shape_predictor_68_face_landmarks.dat
+template.png
+template100.png
+template500.png
+template1000.png
