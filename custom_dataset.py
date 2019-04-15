@@ -1,3 +1,4 @@
+import pickle
 import os
 import random
 import math
@@ -97,3 +98,14 @@ y = []
 for features, label in training_data:
     X.append(features)
     y.append(label)
+
+X = np.array(X)
+#print(X)
+
+pickle_out = open("X.pickle","wb")
+pickle.dump(X, pickle_out)
+pickle_out.close()
+
+pickle_out = open("y.pickle","wb")
+pickle.dump(y, pickle_out)
+pickle_out.close()
