@@ -5,6 +5,7 @@ import time
 import numpy as np
 import imutils
 import math
+import tensorflow as tf
 from imutils import face_utils
 from imutils.face_utils import FaceAligner
 from imutils.face_utils import rect_to_bb
@@ -14,6 +15,52 @@ from sklearn.preprocessing import Normalizer
 import cv2
 
 import dlib
+
+
+
+n_nodes_hl1 = 500
+n_nodes_hl2 = 500
+n_nodes_hl3 = 500
+
+n_classes = 214
+hm_data = 2521
+
+batch_size = 100
+hm_epochs = 15
+
+X_PH = tf.placeholder('float')
+Y_PH = tf.placeholder('float')
+
+
+current_epoch = tf.Variable(1)
+
+def neural_network_model(data):
+    hidden_1_layer = {'weights':tf.Variable(tf.random_normal([8, n_nodes_hl1])),
+                      'biases':tf.Variable(tf.random_normal([n_nodes_hl1]))}
+
+    hidden_2_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),
+                      'biases':tf.Variable(tf.random_normal([n_nodes_hl2]))}
+
+    hidden_3_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl2, n_nodes_hl3])),
+                      'biases':tf.Variable(tf.random_normal([n_nodes_hl3]))}
+
+    output_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl3, n_classes])),
+                    'biases':tf.Variable(tf.random_normal([n_classes])),}
+
+
+    l1 = tf.add(tf.matmul(data,hidden_1_layer['weights']), hidden_1_layer['biases'])
+    l1 = tf.nn.relu(l1)
+
+    l2 = tf.add(tf.matmul(l1,hidden_2_layer['weights']), hidden_2_layer['biases'])
+    l2 = tf.nn.relu(l2)
+
+    l3 = tf.add(tf.matmul(l2,hidden_3_layer['weights']), hidden_3_layer['biases'])
+    l3 = tf.nn.relu(l3)
+
+    output = tf.matmul(l3,output_layer['weights']) + output_layer['biases']
+    
+    return output
+
 
 
 def save_crop(img):
@@ -42,6 +89,18 @@ def face_output(coord, i_1, i_2):
     x_2, y_2 = coord[i_2]
     DISTANCE = math.sqrt(((x_2-x_1)**2)+((y_2-y_1)**2))
     return DISTANCE
+
+def use_neural_network(input_data):
+    prediction = neural_network_model(X_PH)
+        
+    with tf.Session() as sess:
+        sess.run(tf.initialize_all_variables())
+        saver = tf.train.Saver()
+        saver.restore(sess,"model.ckpt")
+
+        features = np.array(input_data)
+        result = (sess.run(tf.argmax(prediction.eval(feed_dict={X_PH:[features]}),1)))
+        print(result)
 
 AP = argparse.ArgumentParser()
 AP.add_argument("-p", "--shape-predictor", required=True,
@@ -82,7 +141,7 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
         
         for k, d in enumerate(DETECT_RET):  
             SHAPE = PREDICTOR(FACE_LIST[i], d)
-        for j in range(0,67):
+        for j in range(68):
             FACE_LANDMARKS_FEATURES.append((SHAPE.part(j).x, SHAPE.part(j).y))
         """
         print("Nose bottom {}".format(FACE_LANDMARKS_FEATURES[33]))
@@ -113,7 +172,9 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
         J_MIN_MAX = preprocessing.MinMaxScaler()
         J_NORM = J_MIN_MAX.fit_transform(J_NP)
 
-        print("Normalized: J1 {} J2 {} J3 {} J4 {} J5 {} J6 {} J7 {} J8 {}".format(J_NORM[0], J_NORM[1], J_NORM[2], J_NORM[3], J_NORM[4], J_NORM[5], J_NORM[6], J_NORM[7]))
+        #print("Normalized: J1 {} J2 {} J3 {} J4 {} J5 {} J6 {} J7 {} J8 {}".format(J_NORM[0], J_NORM[1], J_NORM[2], J_NORM[3], J_NORM[4], J_NORM[5], J_NORM[6], J_NORM[7]))
+        
+        use_neural_network(J_NORM)
 
         if len(DETECT_RET) > 0:
             TEXT = "{} rosto(s) encontrado(s)".format(len(DETECT_RET))

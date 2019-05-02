@@ -21,7 +21,11 @@ PREDICTOR = dlib.shape_predictor(PATH_TO_SCRIPT + "/shape_predictor_68_face_land
 FA = FaceAligner(PREDICTOR, desiredFaceWidth=120)
 
 PATH = PATH_TO_SCRIPT + "/data/mydataset/raw/"
-CATEGORIES = ["person-1", "person-2"]
+
+CATEGORIES = []
+
+for DIRECTORY in os.listdir(PATH):
+    CATEGORIES.append(DIRECTORY)
 
 training_data = []
 
@@ -100,12 +104,18 @@ for features, label in training_data:
     y.append(label)
 
 X = np.array(X)
+y = np.array(y)
 #print(X)
 
+X_fix = np.squeeze(X)
+Y_fix = np.squeeze(y)
+
 pickle_out = open("X.pickle","wb")
-pickle.dump(X, pickle_out)
+pickle.dump(X_fix, pickle_out)
 pickle_out.close()
 
-pickle_out = open("y.pickle","wb")
-pickle.dump(y, pickle_out)
+pickle_out = open("Y.pickle","wb")
+pickle.dump(Y_fix, pickle_out)
 pickle_out.close()
+
+#print(Y_fix)
