@@ -6,6 +6,7 @@ import numpy as np
 import imutils
 import math
 import tensorflow as tf
+import pickle
 from imutils import face_utils
 from imutils.face_utils import FaceAligner
 from imutils.face_utils import rect_to_bb
@@ -17,17 +18,38 @@ import cv2
 import dlib
 
 
+PATH_TO_SCRIPT = os.path.dirname(os.path.realpath(__file__))
+
+PATH = PATH_TO_SCRIPT + "/data/mydataset/raw/"
+
+FILENAMES = os.listdir(PATH)
+
+NAME = []
+for filename in FILENAMES:
+    if os.path.isdir(os.path.join(os.path.abspath(PATH), filename)): # check whether the current object is a folder or not
+        NAME.append(filename)
+
+
+pickle_in = open("X.pickle","rb")
+x_train = pickle.load(pickle_in)
+
+pickle_in = open("Y.pickle","rb")
+y_train_raw = pickle.load(pickle_in)
+
+y_train = np.zeros((len(y_train_raw), y_train_raw.max()+1))
+y_train[np.arange(len(y_train_raw)), y_train_raw] = 1
 
 n_nodes_hl1 = 500
 n_nodes_hl2 = 500
 n_nodes_hl3 = 500
 
 n_classes = 214
-hm_data = 2521
+hm_data = 2307
 
 batch_size = 100
 hm_epochs = 15
 
+#X_PH = tf.placeholder('float', [None, len(x_train[0])])
 X_PH = tf.placeholder('float')
 Y_PH = tf.placeholder('float')
 
@@ -35,7 +57,7 @@ Y_PH = tf.placeholder('float')
 current_epoch = tf.Variable(1)
 
 def neural_network_model(data):
-    hidden_1_layer = {'weights':tf.Variable(tf.random_normal([8, n_nodes_hl1])),
+    hidden_1_layer = {'weights':tf.Variable(tf.random_normal([len(x_train[0]), n_nodes_hl1])),
                       'biases':tf.Variable(tf.random_normal([n_nodes_hl1]))}
 
     hidden_2_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),
@@ -61,7 +83,8 @@ def neural_network_model(data):
     
     return output
 
-
+#saver = tf.train.Saver()
+saver = tf.train.import_meta_graph('model.ckpt.meta')
 
 def save_crop(img):
     for j in range(0, len(img)):
@@ -92,15 +115,14 @@ def face_output(coord, i_1, i_2):
 
 def use_neural_network(input_data):
     prediction = neural_network_model(X_PH)
-        
     with tf.Session() as sess:
-        sess.run(tf.initialize_all_variables())
-        saver = tf.train.Saver()
+        sess.run(tf.global_variables_initializer())
+        #saver = tf.train.Saver()
         saver.restore(sess,"model.ckpt")
 
         features = np.array(input_data)
         result = (sess.run(tf.argmax(prediction.eval(feed_dict={X_PH:[features]}),1)))
-        print(result)
+        return result
 
 AP = argparse.ArgumentParser()
 AP.add_argument("-p", "--shape-predictor", required=True,
@@ -173,8 +195,14 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
         J_NORM = J_MIN_MAX.fit_transform(J_NP)
 
         #print("Normalized: J1 {} J2 {} J3 {} J4 {} J5 {} J6 {} J7 {} J8 {}".format(J_NORM[0], J_NORM[1], J_NORM[2], J_NORM[3], J_NORM[4], J_NORM[5], J_NORM[6], J_NORM[7]))
-        
-        use_neural_network(J_NORM)
+        J_NORM_FIT = np.squeeze(J_NORM)        
+        RESULT = np.asscalar(use_neural_network(J_NORM_FIT))
+        #print(RESULT)
+        #OUTPUT_NAME = NAME.index(RESULT)
+        OUTPUT_NAME = NAME[RESULT]
+
+
+        #print(OUTPUT_NAME)
 
         if len(DETECT_RET) > 0:
             TEXT = "{} rosto(s) encontrado(s)".format(len(DETECT_RET))
@@ -182,17 +210,17 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
                     0.7, (0, 0, 255), 2)
         cv2.rectangle(RESIZE, (x, (y + h)), (x + (x + w) - x, (y + h) + y - (y + h)), (0, 255, 0), 1)
 
-        TEXT = "Rosto {}".format(i+1)
+        TEXT = "{}".format(OUTPUT_NAME)
         cv2.putText(RESIZE, TEXT, (x, y - 10),
             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         i = i + 1 
     cv2.imshow("Video Output Original", RESIZE)
     cv2.moveWindow("Video Output", 0, 0)
-    
+    """    
     if len(FACE_LIST) > 0:
         show_crop(FACE_LIST, 0, len(FACE_LIST))
         save_crop(FACE_LIST)
-
+    """
     k = cv2.waitKey(10) & 0xFF
     if k == ord('c'):
         break
@@ -200,6 +228,8 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
 cv2.destroyAllWindows()
 
 time.sleep(1.0)
+
+"""
 
 if len(FACE_LIST) > 0:
     DELET = ''
@@ -213,5 +243,6 @@ if len(FACE_LIST) > 0:
         print("Pasta(s) apagada(s)")
     else:
         print("Pasta(s) conservada(s)")
+"""
 
 CAP.release()
