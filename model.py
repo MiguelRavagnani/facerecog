@@ -31,14 +31,17 @@ Y_TEST = label_binarizer_2.transform(Y_TEST_RAW)
 #Y_TEST[np.arange(len(Y_TEST_RAW)), (Y_TEST_RAW)] = 1
 
 N_IMPUT = len(X_TRAIN[0])
-N_HIDDEN1 = int((len(X_TRAIN) + Y_TRAIN_RAW.max())/2)
-N_HIDDEN2 = int((len(X_TRAIN) + N_HIDDEN1)/2)
+#N_HIDDEN1 = int((len(X_TRAIN) + Y_TRAIN_RAW.max())/2)
+#N_HIDDEN2 = int((len(X_TRAIN) + N_HIDDEN1)/2)
+N_HIDDEN1 = int((len(X_TRAIN))/2)
+N_HIDDEN2 = int((N_HIDDEN1)/2)
 N_OUTPUT = Y_TRAIN_RAW.max()+1
 
 #hiperparâmetros
 LEARNING_RATE = 1e-4
-N_ITER = 1000
-BATCH_SIZE = 256
+N_ITER = len(X_TRAIN)
+HM_EPOCHS = 20
+BATCH_SIZE = 128
 DROPOUT = 0.5
 
 #Gráfico do TensorFlow
@@ -92,27 +95,26 @@ def train_neural_network(DATA):
 
     with tf.Session() as SESS:
         SESS.run(tf.global_variables_initializer())
+        for EPOCH in range(HM_EPOCHS):
+            print("Starting Epoch {}\n".format(EPOCH+1))
+            for i in range(N_ITER):
+                BATCH_STEP = 0
+                while BATCH_STEP < len(X_TRAIN):
+                    START = BATCH_STEP
+                    END = BATCH_STEP+BATCH_SIZE
 
-        for i in range(N_ITER):
-            BATCH_STEP = 0
-            while BATCH_STEP < len(X_TRAIN):
-                START = BATCH_STEP
-                END = BATCH_STEP+BATCH_SIZE
+                    batch_x = X_TRAIN[START:END]
+                    batch_y = Y_TRAIN[START:END]
+                    
+                    SESS.run(TRAIN_STEP, feed_dict={x: batch_x, y: batch_y})
+                    BATCH_STEP += BATCH_SIZE
+                if i%100 == 0:
+                    MINIBATCH_LOSS, MINIBATCH_ACCURACY = SESS.run([LOG_LOSS, ACCURACY], feed_dict={x: batch_x, y: batch_y, DROP_OUT_CTRL:1.0})
+                    print("Iteration", str(i), "\t| Loss =", str(MINIBATCH_LOSS), "\t| Accuracy =", str(MINIBATCH_ACCURACY))
+                i += (BATCH_SIZE)
 
-                batch_x = X_TRAIN[START:END]
-                batch_y = Y_TRAIN[START:END]
-                
-                SESS.run(TRAIN_STEP, feed_dict={x: batch_x, y: batch_y})
-                BATCH_STEP += BATCH_SIZE
-            if i%100 == 0:
-                MINIBATCH_LOSS, MINIBATCH_ACCURACY = SESS.run([LOG_LOSS, ACCURACY], feed_dict={x: batch_x, y: batch_y, DROP_OUT_CTRL:1.0})
-                print("Iteration", str(i), "\t| Loss =", str(MINIBATCH_LOSS), "\t| Accuracy =", str(MINIBATCH_ACCURACY))
-                if MINIBATCH_LOSS < 0.01:
-                    break
-            #i += (BATCH_SIZE)
-
-        TEST_ACCURACY = SESS.run(ACCURACY, feed_dict={x: X_TEST, y: Y_TEST, DROP_OUT_CTRL:1.0})
-        print("\nAccuracy on test:", TEST_ACCURACY)
+            TEST_ACCURACY = SESS.run(ACCURACY, feed_dict={x: X_TEST, y: Y_TEST, DROP_OUT_CTRL:1.0})
+            print("\nEpoch {} | Accuracy on test: {}".format(EPOCH+1, TEST_ACCURACY))
         PATH_TO_SCRIPT = os.path.dirname(os.path.realpath(__file__))
         save_path = saver.save(SESS, PATH_TO_SCRIPT + "/model.ckpt")
         print("Model saved in path: %s" % save_path)            

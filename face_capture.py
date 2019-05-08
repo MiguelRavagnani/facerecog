@@ -185,7 +185,7 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
         #OUTPUT_NAME = NAME.index(OUTPUT_NUM)
         OUTPUT_NAME = NAME[OUTPUT_NUM]
         print(OUTPUT_NAME)
-
+        
 
         if len(DETECT_RET) > 0:
             TEXT = "{} rosto(s) encontrado(s)".format(len(DETECT_RET))
