@@ -23,6 +23,7 @@ PATH_TO_SCRIPT = os.path.dirname(os.path.realpath(__file__))
 PATH = PATH_TO_SCRIPT + "/data/mydataset/raw/"
 
 FILENAMES = os.listdir(PATH)
+#FILENAMES.sort()
 
 NAME = []
 for filename in FILENAMES:
@@ -43,6 +44,17 @@ X_TEST = pickle.load(PICKLE_IN)
 PICKLE_IN = open("Y_test.pickle","rb")
 Y_TEST_RAW = pickle.load(PICKLE_IN)
 
+"""
+Y_AUX = Y_TRAIN_RAW
+for index in range(len(Y_AUX)-1):
+    if index == len(Y_AUX):
+        Y_TRAIN_RAW[index] = Y_AUX[index]
+    elif index == 0:
+        Y_TRAIN_RAW[index] = Y_AUX[index]
+    else:
+        Y_TRAIN_RAW[index] = Y_AUX[index-1]
+"""
+
 label_binarizer_1 = sklearn.preprocessing.LabelBinarizer()
 label_binarizer_1.fit(range(max(Y_TRAIN_RAW)+1))
 Y_TRAIN = label_binarizer_1.transform(Y_TRAIN_RAW)
@@ -56,26 +68,29 @@ Y_TEST = label_binarizer_2.transform(Y_TEST_RAW)
 #Y_TEST[np.arange(len(Y_TEST_RAW)), (Y_TEST_RAW)] = 1
 
 N_IMPUT = len(X_TRAIN[0])
-N_HIDDEN1 = int((len(X_TRAIN) + Y_TRAIN_RAW.max())/2)
-N_HIDDEN2 = int((len(X_TRAIN) + N_HIDDEN1)/2)
+#N_HIDDEN1 = int((len(X_TRAIN) + Y_TRAIN_RAW.max())/2)
+#N_HIDDEN2 = int((len(X_TRAIN) + N_HIDDEN1)/2)
+N_HIDDEN1 = int((len(X_TRAIN)))
+N_HIDDEN2 = int((N_HIDDEN1)/2)
 N_OUTPUT = Y_TRAIN_RAW.max()+1
 
 #hiperparâmetros
 LEARNING_RATE = 1e-4
-N_ITER = 1000
-BATCH_SIZE = 256
+N_ITER = len(X_TRAIN)
+HM_EPOCHS = 20
+BATCH_SIZE = 128
 DROPOUT = 0.5
 
 tf.reset_default_graph()
 
 #Gráfico do TensorFlow
-X_PH = tf.placeholder(tf.float32, [None, N_IMPUT])
-Y_PH = tf.placeholder(tf.float32, [None, N_OUTPUT])
+X_PH = tf.placeholder('float', [None, N_IMPUT])
+Y_PH = tf.placeholder('float', [None, N_OUTPUT])
 DROP_OUT_CTRL = tf.placeholder(tf.float32)
 
 
 def multilayer_perceptron(DATA):
-    tf.cast(DATA, tf.float32)
+    #tf.cast(DATA, tf.float32)
     LAYER_1 = tf.add(tf.matmul(DATA, WEIGHTS['w1']), BIASES['b1'])
     LAYER_1 = tf.nn.relu(LAYER_1)
 
@@ -185,6 +200,7 @@ while True: # Reproduz video ate que uma tecla definida seja pressionada
         #OUTPUT_NAME = NAME.index(OUTPUT_NUM)
         OUTPUT_NAME = NAME[OUTPUT_NUM]
         print(OUTPUT_NAME)
+        print(OUTPUT_NUM)
         
 
         if len(DETECT_RET) > 0:

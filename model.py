@@ -33,7 +33,7 @@ Y_TEST = label_binarizer_2.transform(Y_TEST_RAW)
 N_IMPUT = len(X_TRAIN[0])
 #N_HIDDEN1 = int((len(X_TRAIN) + Y_TRAIN_RAW.max())/2)
 #N_HIDDEN2 = int((len(X_TRAIN) + N_HIDDEN1)/2)
-N_HIDDEN1 = int((len(X_TRAIN))/2)
+N_HIDDEN1 = int((len(X_TRAIN)))
 N_HIDDEN2 = int((N_HIDDEN1)/2)
 N_OUTPUT = Y_TRAIN_RAW.max()+1
 
