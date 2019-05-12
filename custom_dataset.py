@@ -25,10 +25,14 @@ FA = FaceAligner(PREDICTOR, desiredFaceWidth=480)
 
 PATH = PATH_TO_SCRIPT + "/data/mydataset/raw/"
 
-CATEGORIES = []
+#CATEGORIES = []
+FILENAME = os.listdir(PATH)
+FILENAME.sort()
+CATEGORIES = FILENAME
 
-for DIRECTORY in os.listdir(PATH):
-    CATEGORIES.append(DIRECTORY)
+
+#for DIRECTORY in os.listdir(PATH):
+#    CATEGORIES.append(DIRECTORY)
 
 training_data = []
 
