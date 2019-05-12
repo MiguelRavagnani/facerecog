@@ -23,7 +23,7 @@ PATH_TO_SCRIPT = os.path.dirname(os.path.realpath(__file__))
 PATH = PATH_TO_SCRIPT + "/data/mydataset/raw/"
 
 FILENAMES = os.listdir(PATH)
-#FILENAMES.sort()
+FILENAMES.sort()
 
 NAME = []
 for filename in FILENAMES:
